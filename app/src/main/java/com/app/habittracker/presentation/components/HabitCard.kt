@@ -11,11 +11,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.app.habittracker.domain.model.Habit
 import com.app.habittracker.domain.usecase.timer.CalculateStreakUseCase
-import com.app.habittracker.presentation.theme.SuccessGreen
 import kotlinx.coroutines.delay
 
 @Composable
@@ -96,7 +96,7 @@ fun HabitCard(
                 imageVector = Icons.Default.Timer,
                 contentDescription = "Timer",
                 modifier = Modifier.size(24.dp),
-                tint = SuccessGreen
+                tint = Color.Green
             )
         }
     }

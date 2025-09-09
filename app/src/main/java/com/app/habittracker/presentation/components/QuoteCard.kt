@@ -15,8 +15,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.app.habittracker.domain.model.Quote
-import com.app.habittracker.presentation.theme.GradientEnd
-import com.app.habittracker.presentation.theme.GradientStart
 
 @Composable
 fun QuoteCard(
@@ -31,11 +29,11 @@ fun QuoteCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
+               /* .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(GradientStart, GradientEnd)
                     )
-                )
+                )*/
                 .padding(20.dp)
         ) {
             Column(
