@@ -35,14 +35,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<!--
-        &lt;!&ndash; Notification Receiver &ndash;&gt;
+
+        <!-- Notification Receiver -->
         <receiver
             android:name=".data.receiver.NotificationReceiver"
             android:enabled="true"
             android:exported="false" />
 
-        &lt;!&ndash; Boot Receiver &ndash;&gt;
+        <!-- Boot Receiver -->
         <receiver
             android:name=".data.receiver.BootReceiver"
             android:enabled="true"
@@ -52,11 +52,11 @@
             </intent-filter>
         </receiver>
 
-        &lt;!&ndash; Achievement Receiver &ndash;&gt;
+        <!-- Achievement Receiver -->
         <receiver
             android:name=".data.receiver.AchievementReceiver"
             android:enabled="true"
-            android:exported="false" />-->
+            android:exported="false" />
 
         <!-- Firebase Meta Data -->
         <meta-data
