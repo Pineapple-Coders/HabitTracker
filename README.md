@@ -5,11 +5,11 @@ This app helps users track habits they want to leave, such as smoking, drinking,
 
 📱 Screenshots
 Add Habit
-<img src="./Screen%201.png" width="300"/>
+<img src="Screenshots/screen1.png" width="300"/>
 Habit Details
-<img src="./Screen%202.png" width="300"/>
+<img src="Screenshots/screen2.png" width="300"/>
 Habit Timer Dashboard
-<img src="./Screen%203.png" width="300"/>
+<img src="Screenshots/screen3.png" width="300"/>
 🚀 Features
 
 Add Habits → Create new habits you want to quit (e.g., Smoking, Drinking, Junk Food, Gaming).
