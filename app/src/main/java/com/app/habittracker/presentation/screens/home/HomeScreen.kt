@@ -13,109 +13,130 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.app.habittracker.domain.model.HabitIcon
 import com.app.habittracker.domain.usecase.timer.CalculateStreakUseCase
+import com.app.habittracker.presentation.components.CircularProgressRing
 import com.app.habittracker.presentation.components.EmptyStateView
-import com.app.habittracker.presentation.components.QuoteCard
 import com.app.habittracker.presentation.theme.*
+import java.text.SimpleDateFormat
+import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToAddHabit: () -> Unit,
     onNavigateToHabitDetail: (Long) -> Unit,
-    onNavigateToAchievements: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val calculateStreakUseCase = remember { CalculateStreakUseCase() }
+    val appColors = LocalAppColors.current
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+    val currentDate = remember {
+        SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(Date())
+    }
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Habit Timer",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary
-                    )
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Background
-                )
-            )
-        },
-        bottomBar = {
-            BottomNavigationBar(
-                onAchievementsClick = onNavigateToAchievements,
-                onSettingsClick = onNavigateToSettings
-            )
-        },
         floatingActionButton = {
             if (uiState.habits.size < 8) {
-                FloatingActionButton(
+                ExtendedFloatingActionButton(
                     onClick = onNavigateToAddHabit,
-                    containerColor = Primary,
-                    shape = CircleShape,
-                    modifier = Modifier.size(56.dp)
+                    containerColor = TealAccent,
+                    contentColor = Color.White,
+                    modifier = Modifier.padding(bottom = if (isLandscape) 8.dp else 16.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Add Habit",
-                        tint = Color.White
+                        contentDescription = "Add"
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Add Habit", fontWeight = FontWeight.SemiBold)
                 }
             }
         },
-        containerColor = Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiState.habits.isEmpty()) {
-                EmptyStateView(
-                    title = "No habits yet",
-                    message = "Tap the + button to add your first habit",
-                    buttonText = null,
-                    onButtonClick = null
+            // Header with title and date
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = if (isLandscape) 48.dp else 24.dp,
+                        vertical = if (isLandscape) 16.dp else 24.dp
+                    ),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Habit Timer",
+                    fontSize = if (isLandscape) 24.sp else 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = appColors.textPrimary
                 )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // Daily Quote
-                    uiState.dailyQuote?.let { quote ->
-                        item {
-                            QuoteCard(quote = quote)
+                Text(
+                    text = currentDate,
+                    fontSize = 14.sp,
+                    color = appColors.textSecondary
+                )
+            }
+
+            // Scrollable content
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                if (uiState.habits.isEmpty()) {
+                    EmptyStateView(
+                        title = "No habits yet",
+                        message = "Tap 'Add Habit' to start tracking",
+                        buttonText = null,
+                        onButtonClick = null
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = if (isLandscape) 48.dp else 24.dp,
+                            end = if (isLandscape) 48.dp else 24.dp,
+                            bottom = 80.dp  // Extra padding for FAB
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(if (isLandscape) 12.dp else 16.dp)
+                    ) {
+                        // Daily Quote
+                        uiState.dailyQuote?.let { quote ->
+                            item {
+                                NewQuoteCard(quote = quote, appColors = appColors)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
                         }
-                    }
 
-                    // Habits
-                    items(
-                        items = uiState.habits,
-                        key = { it.id }
-                    ) { habit ->
-                        HabitCardRedesigned(
-                            habit = habit,
-                            calculateStreakUseCase = calculateStreakUseCase,
-                            onClick = { onNavigateToHabitDetail(habit.id) }
-                        )
-                    }
-
-                    // Bottom spacing
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
+                        // Habit Cards
+                        items(
+                            items = uiState.habits,
+                            key = { it.id }
+                        ) { habit ->
+                            GradientHabitCard(
+                                habit = habit,
+                                calculateStreakUseCase = calculateStreakUseCase,
+                                onClick = { onNavigateToHabitDetail(habit.id) }
+                            )
+                        }
                     }
                 }
             }
@@ -124,70 +145,71 @@ fun HomeScreen(
 }
 
 @Composable
-fun BottomNavigationBar(
-    onAchievementsClick: () -> Unit,
-    onSettingsClick: () -> Unit
+fun NewQuoteCard(
+    quote: com.app.habittracker.domain.model.Quote,
+    appColors: AppColors
 ) {
-    NavigationBar(
-        containerColor = CardBackground,
-        tonalElevation = 8.dp
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = QuoteCardBg),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        NavigationBarItem(
-            selected = true,
-            onClick = { },
-            icon = {
-                Icon(
-                    Icons.Default.Home,
-                    contentDescription = "Home",
-                    tint = Primary
-                )
-            },
-            label = {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            // Quote icon on left
+            Icon(
+                imageVector = Icons.Default.FormatQuote,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+                    .rotate(180f),
+                tint = appColors.textSecondary
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Quote text in center
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Home",
-                    color = Primary
+                    text = quote.text,
+                    fontSize = 14.sp,
+                    color = appColors.textPrimary,
+                    lineHeight = 20.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "— ${quote.author}",
+                    fontSize = 12.sp,
+                    color = appColors.textSecondary
                 )
             }
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = onAchievementsClick,
-            icon = {
-                Icon(
-                    Icons.Default.EmojiEvents,
-                    contentDescription = "Achievements",
-                    tint = TextSecondary
-                )
-            },
-            label = {
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Badge on right
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = QuoteBadgeBg
+            ) {
                 Text(
-                    "Achievements",
-                    color = TextSecondary
+                    text = "Daily",
+                    fontSize = 10.sp,
+                    color = QuoteBadgeText,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = onSettingsClick,
-            icon = {
-                Icon(
-                    Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = TextSecondary
-                )
-            },
-            label = {
-                Text(
-                    "Settings",
-                    color = TextSecondary
-                )
-            }
-        )
+        }
     }
 }
 
 @Composable
-fun HabitCardRedesigned(
+fun GradientHabitCard(
     habit: com.app.habittracker.domain.model.Habit,
     calculateStreakUseCase: CalculateStreakUseCase,
     onClick: () -> Unit
@@ -205,76 +227,90 @@ fun HabitCardRedesigned(
         calculateStreakUseCase(habit)
     }
 
+    val gradientColors = getHabitGradient(habit.icon)
+    val achievementProgress = calculateAchievementProgress(streakInfo.daysClean)
+
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardBackground
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .background(Brush.horizontalGradient(gradientColors))
+                .padding(16.dp)
         ) {
-            // Icon
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        when(habit.icon.iconName) {
-                            "Smoking" -> SmokingIconBg
-                            "Drinking" -> DrinkingIconBg
-                            "Junk Food" -> JunkFoodIconBg
-                            "Gaming" -> GamingIconBg
-                            else -> IconBackground
-                        }
-                    ),
-                contentAlignment = Alignment.Center
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Icon - white on gradient
                 Icon(
                     imageVector = habit.icon.icon,
                     contentDescription = habit.name,
-                    modifier = Modifier.size(24.dp),
-                    tint = TextPrimary
+                    modifier = Modifier.size(28.dp),
+                    tint = Color.White
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // Name + Timer
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = habit.name,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = buildString {
+                            if (streakInfo.daysClean > 0) {
+                                append("${streakInfo.daysClean} days ")
+                            }
+                            if (streakInfo.hoursClean > 0) {
+                                append("${streakInfo.hoursClean} hours ")
+                            }
+                            if (streakInfo.daysClean == 0 && streakInfo.hoursClean == 0) {
+                                append("${streakInfo.minutesClean} mins")
+                            }
+                        }.trim(),
+                        fontSize = 14.sp,
+                        color = Color.White.copy(alpha = 0.9f)
+                    )
+                }
+
+                // Progress Ring
+                CircularProgressRing(
+                    progress = achievementProgress,
+                    size = 48.dp,
+                    strokeWidth = 4.dp,
+                    backgroundColor = ProgressRingBg,
+                    progressColor = ProgressRingFg,
+                    showPercentage = true
                 )
             }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = habit.name,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary
-                )
-                Text(
-                    text = buildString {
-                        append("${streakInfo.daysClean}d ")
-                        append("${streakInfo.hoursClean}h ")
-                        append("${streakInfo.minutesClean}m")
-                    },
-                    fontSize = 14.sp,
-                    color = TextSecondary,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
-
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = "View Details",
-                modifier = Modifier.size(24.dp),
-                tint = TextSecondary
-            )
         }
     }
+}
+
+fun getHabitGradient(icon: HabitIcon): List<Color> {
+    return when(icon) {
+        HabitIcon.SMOKING -> listOf(SmokingGradientStart, SmokingGradientEnd)
+        HabitIcon.DRINKING -> listOf(DrinkingGradientStart, DrinkingGradientEnd)
+        HabitIcon.JUNK_FOOD -> listOf(JunkFoodGradientStart, JunkFoodGradientEnd)
+        HabitIcon.GAMING -> listOf(GamingGradientStart, GamingGradientEnd)
+        HabitIcon.COFFEE -> listOf(CoffeeGradientStart, CoffeeGradientEnd)
+        HabitIcon.SOCIAL_MEDIA -> listOf(SocialMediaGradientStart, SocialMediaGradientEnd)
+        HabitIcon.SHOPPING -> listOf(ShoppingGradientStart, ShoppingGradientEnd)
+        else -> listOf(DefaultGradientStart, DefaultGradientEnd)
+    }
+}
+
+fun calculateAchievementProgress(daysClean: Int): Float {
+    val levels = listOf(1, 3, 7, 30, 90, 180, 365)
+    val nextLevel = levels.firstOrNull { it > daysClean } ?: 365
+    val prevLevel = levels.lastOrNull { it <= daysClean } ?: 0
+    return if (nextLevel == prevLevel) 1f
+    else ((daysClean - prevLevel).toFloat() / (nextLevel - prevLevel)).coerceIn(0f, 1f)
 }
