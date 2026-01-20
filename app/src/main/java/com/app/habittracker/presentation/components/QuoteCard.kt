@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -24,16 +25,19 @@ fun QuoteCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-               /* .background(
+                .background(
                     brush = Brush.horizontalGradient(
-                        colors = listOf(GradientStart, GradientEnd)
+                        colors = listOf(
+                            Color(0xFF667EEA),
+                            Color(0xFF764BA2)
+                        )
                     )
-                )*/
+                )
                 .padding(20.dp)
         ) {
             Column(
@@ -45,7 +49,7 @@ fun QuoteCard(
                     modifier = Modifier
                         .size(32.dp)
                         .rotate(180f),
-                    tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                    tint = Color.White.copy(alpha = 0.7f)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -53,7 +57,7 @@ fun QuoteCard(
                 Text(
                     text = quote.text,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = Color.White,
                     textAlign = TextAlign.Center,
                     fontStyle = FontStyle.Italic
                 )
@@ -63,7 +67,7 @@ fun QuoteCard(
                 Text(
                     text = "— ${quote.author}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                    color = Color.White.copy(alpha = 0.9f),
                     textAlign = TextAlign.End,
                     modifier = Modifier.fillMaxWidth()
                 )
