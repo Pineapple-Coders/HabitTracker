@@ -12,4 +12,11 @@
     <color name="primary_variant">#3700B3</color>
     <color name="secondary">#03DAC6</color>
     <color name="secondary_variant">#018786</color>
+
+    <!-- Shortcut and Widget colors -->
+    <color name="shortcut_background">#26D0CE</color>
+    <color name="widget_background">#FFFFFF</color>
+    <color name="widget_text_primary">#2C3E50</color>
+    <color name="widget_text_secondary">#7F8C8D</color>
+    <color name="teal_accent">#26D0CE</color>
 </resources>
