@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="add_habit"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_add"
+        android:shortcutShortLabel="@string/shortcut_add_habit_short"
+        android:shortcutLongLabel="@string/shortcut_add_habit_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.app.habittracker"
+            android:targetClass="com.app.habittracker.MainActivity"
+            android:data="habittracker://add_habit" />
+        <categories android:name="android.shortcut.category.CAPTURE" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="view_achievements"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_trophy"
+        android:shortcutShortLabel="@string/shortcut_achievements_short"
+        android:shortcutLongLabel="@string/shortcut_achievements_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.app.habittracker"
+            android:targetClass="com.app.habittracker.MainActivity"
+            android:data="habittracker://achievements" />
+        <categories android:name="android.shortcut.category.BROWSE" />
+    </shortcut>
+
+</shortcuts>
