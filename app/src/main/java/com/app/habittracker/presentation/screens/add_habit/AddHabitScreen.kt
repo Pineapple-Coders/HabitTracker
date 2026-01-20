@@ -4,11 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -16,9 +15,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,57 +37,85 @@ fun AddHabitScreen(
         }
     }
 
+    val appColors = LocalAppColors.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header
-            Text(
-                text = "Add Habit",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-                modifier = Modifier.padding(vertical = 24.dp)
-            )
+            // Header with back button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = appColors.textPrimary
+                    )
+                }
 
-            // White Card Container
+                Spacer(modifier = Modifier.weight(1f))
+
+                Text(
+                    text = "Add New Habit",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = appColors.textPrimary
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(40.dp))
+            }
+
+            // Habit Name Input Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackground),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = appColors.cardBackground),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(16.dp)
                 ) {
-                    // Habit Name Input
+                    Text(
+                        text = "Habit Name",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = appColors.textSecondary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                     OutlinedTextField(
                         value = uiState.habitName,
                         onValueChange = viewModel::updateHabitName,
                         placeholder = {
                             Text(
-                                "Habit Name",
-                                color = TextSecondary
+                                "Enter habit name",
+                                color = appColors.textLight
                             )
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(IconBackground, RoundedCornerShape(12.dp)),
+                        modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Transparent,
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedContainerColor = IconBackground,
-                            unfocusedContainerColor = IconBackground
+                            focusedBorderColor = TealAccent,
+                            unfocusedBorderColor = appColors.inputBackground,
+                            focusedContainerColor = appColors.inputBackground,
+                            unfocusedContainerColor = appColors.inputBackground
                         ),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
@@ -100,76 +127,98 @@ fun AddHabitScreen(
                             text = uiState.errorMessage!!,
                             color = MaterialTheme.colorScheme.error,
                             fontSize = 12.sp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp, start = 8.dp)
+                            modifier = Modifier.padding(top = 4.dp)
                         )
                     }
+                }
+            }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-                    // Icon Grid - Show only 4 main icons like in your design
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        val mainIcons = listOf(
-                            HabitIcon.SMOKING,
-                            HabitIcon.DRINKING,
-                            HabitIcon.JUNK_FOOD,
-                            HabitIcon.GAMING
+            // Choose Habits Section
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = appColors.cardBackground),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "Choose Habit Type",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = appColors.textSecondary,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    // Habit type cards
+                    val allIcons = listOf(
+                        HabitIcon.SMOKING,
+                        HabitIcon.DRINKING,
+                        HabitIcon.JUNK_FOOD,
+                        HabitIcon.GAMING,
+                        HabitIcon.COFFEE,
+                        HabitIcon.SOCIAL_MEDIA,
+                        HabitIcon.SHOPPING
+                    )
+
+                    allIcons.forEach { icon ->
+                        HabitTypeCard(
+                            icon = icon,
+                            isSelected = uiState.selectedIcon == icon,
+                            onClick = { viewModel.updateSelectedIcon(icon) },
+                            appColors = appColors
                         )
-
-                        mainIcons.forEach { icon ->
-                            IconOption(
-                                icon = icon,
-                                isSelected = uiState.selectedIcon == icon,
-                                onClick = { viewModel.updateSelectedIcon(icon) }
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(200.dp))
-
-                    // Save Button
-                    Button(
-                        onClick = viewModel::saveHabit,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(28.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = ButtonGray
-                        ),
-                        enabled = !uiState.isLoading
-                    ) {
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = Color.White
-                            )
-                        } else {
-                            Text(
-                                text = "Save",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.White
-                            )
+                        if (icon != allIcons.last()) {
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Bottom text
+            // Save Button
+            Button(
+                onClick = viewModel::saveHabit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(28.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = TealAccent
+                ),
+                enabled = !uiState.isLoading
+            ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
+                    )
+                } else {
+                    Text(
+                        text = "Save Habit",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Cancel button
             TextButton(
                 onClick = onNavigateBack,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Add Habit",
-                    color = TextSecondary,
+                    text = "Cancel",
+                    color = appColors.textSecondary,
                     fontSize = 14.sp
                 )
             }
@@ -178,37 +227,80 @@ fun AddHabitScreen(
 }
 
 @Composable
-fun IconOption(
+fun HabitTypeCard(
     icon: HabitIcon,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    appColors: AppColors
 ) {
-    Box(
+    val gradientColors = when(icon) {
+        HabitIcon.SMOKING -> listOf(SmokingGradientStart, SmokingGradientEnd)
+        HabitIcon.DRINKING -> listOf(DrinkingGradientStart, DrinkingGradientEnd)
+        HabitIcon.JUNK_FOOD -> listOf(JunkFoodGradientStart, JunkFoodGradientEnd)
+        HabitIcon.GAMING -> listOf(GamingGradientStart, GamingGradientEnd)
+        HabitIcon.COFFEE -> listOf(CoffeeGradientStart, CoffeeGradientEnd)
+        HabitIcon.SOCIAL_MEDIA -> listOf(SocialMediaGradientStart, SocialMediaGradientEnd)
+        HabitIcon.SHOPPING -> listOf(ShoppingGradientStart, ShoppingGradientEnd)
+        else -> listOf(DefaultGradientStart, DefaultGradientEnd)
+    }
+
+    Card(
+        onClick = onClick,
         modifier = Modifier
-            .size(72.dp)
-            .clip(CircleShape)
-            .background(
-                when(icon.iconName) {
-                    "Smoking" -> if (isSelected) SmokingIconBg else IconBackground
-                    "Drinking" -> if (isSelected) DrinkingIconBg else IconBackground
-                    "Junk Food" -> if (isSelected) JunkFoodIconBg else IconBackground
-                    "Gaming" -> if (isSelected) GamingIconBg else IconBackground
-                    else -> IconBackground
+            .fillMaxWidth()
+            .then(
+                if (isSelected) {
+                    Modifier.border(2.dp, TealAccent, RoundedCornerShape(12.dp))
+                } else {
+                    Modifier
                 }
-            )
-            .border(
-                width = if (isSelected) 2.dp else 0.dp,
-                color = if (isSelected) Primary else Color.Transparent,
-                shape = CircleShape
-            )
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon.icon,
-            contentDescription = icon.iconName,
-            modifier = Modifier.size(32.dp),
-            tint = if (isSelected) Primary else TextPrimary
+            ),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) appColors.cardBackground else appColors.inputBackground
         )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Icon with gradient background
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Brush.horizontalGradient(gradientColors)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon.icon,
+                    contentDescription = icon.iconName,
+                    modifier = Modifier.size(22.dp),
+                    tint = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = icon.iconName,
+                fontSize = 16.sp,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                color = appColors.textPrimary,
+                modifier = Modifier.weight(1f)
+            )
+
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Selected",
+                    modifier = Modifier.size(24.dp),
+                    tint = TealAccent
+                )
+            }
+        }
     }
 }
+
