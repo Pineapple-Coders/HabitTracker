@@ -28,12 +28,6 @@ fun NavGraph(
                 },
                 onNavigateToHabitDetail = { habitId ->
                     navController.navigate(Screen.HabitDetail.createRoute(habitId))
-                },
-                onNavigateToAchievements = {
-                    navController.navigate(Screen.Achievements.route)
-                },
-                onNavigateToSettings = {
-                    navController.navigate(Screen.Settings.route)
                 }
             )
         }
