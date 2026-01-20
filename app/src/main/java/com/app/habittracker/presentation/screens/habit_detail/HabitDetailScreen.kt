@@ -3,25 +3,26 @@ package com.app.habittracker.presentation.screens.habit_detail
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.app.habittracker.presentation.components.AchievementBadgeRow
 import com.app.habittracker.presentation.components.CustomDialog
-import com.app.habittracker.presentation.components.TimerDisplay
+import com.app.habittracker.presentation.components.LargeCircularTimer
+import com.app.habittracker.presentation.screens.home.calculateAchievementProgress
+import com.app.habittracker.presentation.screens.home.getHabitGradient
 import com.app.habittracker.presentation.theme.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.datetime.toJavaInstant
@@ -43,19 +44,23 @@ fun HabitDetailScreen(
         }
     }
 
+    val appColors = LocalAppColors.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             // Header with back button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 24.dp),
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
@@ -65,7 +70,7 @@ fun HabitDetailScreen(
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
-                        tint = TextPrimary
+                        tint = appColors.textPrimary
                     )
                 }
 
@@ -76,7 +81,7 @@ fun HabitDetailScreen(
                         text = habit.name,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary
+                        color = appColors.textPrimary
                     )
                 }
 
@@ -95,102 +100,185 @@ fun HabitDetailScreen(
             }
 
             uiState.habit?.let { habit ->
+                val gradientColors = getHabitGradient(habit.icon)
+                val progress = calculateAchievementProgress(uiState.currentStreakDays)
+                val progressPercent = (progress * 100).toInt()
+
+                // Large Circular Timer
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LargeCircularTimer(
+                        days = uiState.currentStreakDays,
+                        hours = uiState.currentStreakHours,
+                        minutes = uiState.currentStreakMinutes,
+                        progress = progress,
+                        gradientColors = gradientColors
+                    )
+                }
+
+                // Progress to Next Card
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = appColors.cardBackground)
                 ) {
-                    Column(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Current Streak Section
+                        Icon(
+                            imageVector = Icons.Default.Timer,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = TealAccent
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Current Streak",
+                            text = "Progress to next: $progressPercent%",
                             fontSize = 14.sp,
-                            color = TextSecondary,
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            color = appColors.textPrimary,
+                            modifier = Modifier.weight(1f)
                         )
-
-                        TimerDisplay(
-                            days = uiState.currentStreakDays,
-                            hours = uiState.currentStreakHours,
-                            minutes = uiState.currentStreakMinutes
+                        LinearProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier.width(80.dp),
+                            color = TealAccent,
+                            trackColor = appColors.inputBackground
                         )
+                    }
+                }
 
-                        Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                        // Longest Streak Section
+                // Notification Toggle Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = appColors.cardBackground)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = TealAccent
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Longest Streak",
+                            text = "Get Notified",
                             fontSize = 14.sp,
-                            color = TextSecondary,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            color = appColors.textPrimary,
+                            modifier = Modifier.weight(1f)
                         )
-
-                        Text(
-                            text = "${uiState.longestStreakDays} days ${uiState.longestStreakHours} hours",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary
+                        Switch(
+                            checked = true,
+                            onCheckedChange = { },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = TealAccent
+                            )
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // History Section
-                if (uiState.resetHistory.isNotEmpty()) {
-                    Text(
-                        text = "History",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary,
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
-                    )
+                // Achievement Badge Row
+                Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                    AchievementBadgeRow(currentDays = uiState.currentStreakDays)
+                }
 
-                    LazyColumn(
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Stats Row (Current vs Longest)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = appColors.cardBackground)
+                ) {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f)
-                            .padding(horizontal = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            .padding(16.dp)
                     ) {
-                        items(uiState.resetHistory.take(10)) { reset ->
-                            HistoryItem(reset = reset)
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Current Streak",
+                                fontSize = 12.sp,
+                                color = appColors.textSecondary
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "${uiState.currentStreakDays}d ${uiState.currentStreakHours}h",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = appColors.textPrimary
+                            )
                         }
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No reset history yet.\nKeep going strong!",
-                            fontSize = 14.sp,
-                            color = TextSecondary,
-                            textAlign = TextAlign.Center
-                        )
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Longest Streak",
+                                fontSize = 12.sp,
+                                color = appColors.textSecondary
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "${uiState.longestStreakDays}d ${uiState.longestStreakHours}h",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = appColors.textPrimary
+                            )
+                        }
                     }
                 }
 
-                // Reset Button
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Menu Items
+                if (uiState.resetHistory.isNotEmpty()) {
+                    MenuItemRow(
+                        title = "Reset History",
+                        subtitle = "${uiState.resetHistory.size} resets",
+                        onClick = { },
+                        appColors = appColors
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Reset Button - Coral Color
                 Button(
                     onClick = { viewModel.showResetDialog() },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp)
+                        .padding(horizontal = 20.dp)
                         .height(56.dp),
                     shape = RoundedCornerShape(28.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ButtonGray
+                        containerColor = ResetButtonColor
                     )
                 ) {
                     Icon(
@@ -200,11 +288,13 @@ fun HabitDetailScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Reset",
+                        text = "Reset Streak",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
 
@@ -219,7 +309,7 @@ fun HabitDetailScreen(
                 modifier = Modifier.padding(20.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Primary
+                    containerColor = TealAccent
                 )
             ) {
                 Text(
@@ -259,37 +349,45 @@ fun HabitDetailScreen(
 }
 
 @Composable
-fun HistoryItem(reset: com.app.habittracker.domain.model.ResetHistory) {
-    val formatter = DateTimeFormatter.ofPattern("dd MMM")
-        .withZone(ZoneId.systemDefault())
-
-    val date = formatter.format(reset.resetDate.toJavaInstant())
-    val days = reset.streakDuration / 86400
-    val hours = (reset.streakDuration % 86400) / 3600
-
+fun MenuItemRow(
+    title: String,
+    subtitle: String? = null,
+    onClick: () -> Unit,
+    appColors: AppColors
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = IconBackground
-        )
+        colors = CardDefaults.cardColors(containerColor = appColors.cardBackground)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = date,
-                fontSize = 14.sp,
-                color = TextPrimary
-            )
-            Text(
-                text = "$days days $hours hours",
-                fontSize = 14.sp,
-                color = TextSecondary
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    color = appColors.textPrimary
+                )
+                if (subtitle != null) {
+                    Text(
+                        text = subtitle,
+                        fontSize = 12.sp,
+                        color = appColors.textSecondary
+                    )
+                }
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = appColors.textSecondary
             )
         }
     }
