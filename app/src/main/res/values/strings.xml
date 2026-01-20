@@ -19,4 +19,18 @@
     <string name="dark_mode">Dark Mode</string>
     <string name="notifications">Notifications</string>
     <string name="daily_quotes">Daily Quotes</string>
+
+    <!-- Shortcuts -->
+    <string name="shortcut_add_habit_short">Add Habit</string>
+    <string name="shortcut_add_habit_long">Add a new habit to track</string>
+    <string name="shortcut_achievements_short">Achievements</string>
+    <string name="shortcut_achievements_long">View your achievements</string>
+
+    <!-- Widgets -->
+    <string name="widget_small_name">Habit Streak</string>
+    <string name="widget_small_description">Shows your habit streak timer</string>
+    <string name="widget_medium_name">Habit Overview</string>
+    <string name="widget_medium_description">Shows multiple habit streaks</string>
+    <string name="widget_no_habits">No habits yet</string>
+    <string name="widget_tap_to_add">Tap to add a habit</string>
 </resources>
