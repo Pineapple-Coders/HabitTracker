@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,10 +29,12 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }
 
+    val appColors = LocalAppColors.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
@@ -45,28 +48,12 @@ fun SettingsScreen(
                     .padding(horizontal = 20.dp, vertical = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = onNavigateBack,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = TextPrimary
-                    )
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
                 Text(
                     text = "Settings",
-                    fontSize = 20.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = appColors.textPrimary
                 )
-
-                Spacer(modifier = Modifier.weight(1f))
-                Spacer(modifier = Modifier.width(40.dp))
             }
 
             // Appearance Section
@@ -148,6 +135,8 @@ fun SettingsSection(
     title: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val appColors = LocalAppColors.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -158,14 +147,14 @@ fun SettingsSection(
             text = title,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            color = Primary,
+            color = TealAccent,
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = CardBackground),
+            colors = CardDefaults.cardColors(containerColor = appColors.cardBackground),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Column(
@@ -184,6 +173,8 @@ fun SettingsItem(
     subtitle: String,
     onClick: () -> Unit
 ) {
+    val appColors = LocalAppColors.current
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -195,7 +186,7 @@ fun SettingsItem(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
-            tint = TextPrimary
+            tint = appColors.textPrimary
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -206,12 +197,12 @@ fun SettingsItem(
             Text(
                 text = title,
                 fontSize = 16.sp,
-                color = TextPrimary
+                color = appColors.textPrimary
             )
             Text(
                 text = subtitle,
                 fontSize = 14.sp,
-                color = TextSecondary
+                color = appColors.textSecondary
             )
         }
 
@@ -219,7 +210,7 @@ fun SettingsItem(
             imageVector = Icons.Default.ChevronRight,
             contentDescription = null,
             modifier = Modifier.size(20.dp),
-            tint = TextSecondary
+            tint = appColors.textSecondary
         )
     }
 }
@@ -232,6 +223,8 @@ fun SettingsSwitchItem(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val appColors = LocalAppColors.current
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -242,7 +235,7 @@ fun SettingsSwitchItem(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
-            tint = TextPrimary
+            tint = appColors.textPrimary
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -253,12 +246,12 @@ fun SettingsSwitchItem(
             Text(
                 text = title,
                 fontSize = 16.sp,
-                color = TextPrimary
+                color = appColors.textPrimary
             )
             Text(
                 text = subtitle,
                 fontSize = 14.sp,
-                color = TextSecondary
+                color = appColors.textSecondary
             )
         }
 
@@ -266,8 +259,10 @@ fun SettingsSwitchItem(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Primary,
-                checkedTrackColor = Primary.copy(alpha = 0.5f)
+                checkedThumbColor = Color.White,
+                checkedTrackColor = TealAccent,
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = appColors.inputBackground
             )
         )
     }
@@ -279,6 +274,8 @@ fun ThemeSelectionDialog(
     onThemeSelected: (ThemeMode) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val appColors = LocalAppColors.current
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -301,7 +298,7 @@ fun ThemeSelectionDialog(
                             selected = currentTheme == theme,
                             onClick = { onThemeSelected(theme) },
                             colors = RadioButtonDefaults.colors(
-                                selectedColor = Primary
+                                selectedColor = TealAccent
                             )
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -312,7 +309,7 @@ fun ThemeSelectionDialog(
                                 ThemeMode.SYSTEM -> "System Default"
                             },
                             fontSize = 16.sp,
-                            color = TextPrimary
+                            color = appColors.textPrimary
                         )
                     }
                 }
@@ -321,7 +318,7 @@ fun ThemeSelectionDialog(
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Cancel", color = TealAccent)
             }
         }
     )
